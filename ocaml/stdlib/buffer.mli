@@ -64,22 +64,22 @@ val create : int -> t
    If [n] is not between 1 and {!Sys.max_string_length}, it will
    be clipped to that interval. *)
 
-val contents : t -> string
+val contents : local_ t -> string
 (** Return a copy of the current contents of the buffer.
     The buffer itself is unchanged. *)
 
-val to_bytes : t -> bytes
+val to_bytes : local_ t -> bytes
 (** Return a copy of the current contents of the buffer.
     The buffer itself is unchanged.
     @since 4.02 *)
 
-val sub : t -> int -> int -> string
+val sub : local_ t -> int -> int -> string
 (** [Buffer.sub b off len] returns a copy of [len] bytes from the
     current contents of the buffer [b], starting at offset [off].
     @raise Invalid_argument if [off] and [len] do not designate a valid
     range of [b]. *)
 
-val blit : t -> int -> bytes -> int -> int -> unit
+val blit : local_ t -> int -> bytes -> int -> int -> unit
 (** [Buffer.blit src srcoff dst dstoff len] copies [len] characters from
    the current contents of the buffer [src], starting at offset [srcoff]
    to [dst], starting at character [dstoff].
@@ -89,29 +89,29 @@ val blit : t -> int -> bytes -> int -> int -> unit
    @since 3.11.2
 *)
 
-val nth : t -> int -> char
+val nth : local_ t -> int -> char
 (** Get the n-th character of the buffer.
     @raise Invalid_argument if
     index out of bounds *)
 
-val length : t -> int
+val length : local_ t -> int
 (** Return the number of characters currently contained in the buffer. *)
 
-val clear : t -> unit
+val clear : local_ t -> unit
 (** Empty the buffer. *)
 
-val reset : t -> unit
+val reset : local_ t -> unit
 (** Empty the buffer and deallocate the internal byte sequence holding the
    buffer contents, replacing it with the initial internal byte sequence
    of length [n] that was allocated by {!Buffer.create} [n].
    For long-lived buffers that may have grown a lot, [reset] allows
    faster reclamation of the space used by the buffer. *)
 
-val output_buffer : out_channel -> t -> unit
+val output_buffer : out_channel -> local_ t -> unit
 (** [output_buffer oc b] writes the current contents of buffer [b]
    on the output channel [oc]. *)
 
-val truncate : t -> int -> unit
+val truncate : local_ t -> int -> unit
 (** [truncate b len] truncates the length of [b] to [len]
   Note: the internal byte sequence is not shortened.
   @raise Invalid_argument if [len < 0] or [len > length b].
@@ -123,44 +123,44 @@ val truncate : t -> int -> unit
     sequence of the buffer would need to grow beyond {!Sys.max_string_length}.
 *)
 
-val add_char : t -> char -> unit
+val add_char : local_ t -> char -> unit
 (** [add_char b c] appends the character [c] at the end of buffer [b]. *)
 
-val add_utf_8_uchar : t -> Uchar.t -> unit
+val add_utf_8_uchar : local_ t -> Uchar.t -> unit
 (** [add_utf_8_uchar b u] appends the {{:https://tools.ietf.org/html/rfc3629}
     UTF-8} encoding of [u] at the end of buffer [b].
 
     @since 4.06 *)
 
-val add_utf_16le_uchar : t -> Uchar.t -> unit
+val add_utf_16le_uchar : local_ t -> Uchar.t -> unit
 (** [add_utf_16le_uchar b u] appends the
     {{:https://tools.ietf.org/html/rfc2781}UTF-16LE} encoding of [u]
     at the end of buffer [b].
 
     @since 4.06 *)
 
-val add_utf_16be_uchar : t -> Uchar.t -> unit
+val add_utf_16be_uchar : local_ t -> Uchar.t -> unit
 (** [add_utf_16be_uchar b u] appends the
     {{:https://tools.ietf.org/html/rfc2781}UTF-16BE} encoding of [u]
     at the end of buffer [b].
 
     @since 4.06 *)
 
-val add_string : t -> string -> unit
+val add_string : local_ t -> string -> unit
 (** [add_string b s] appends the string [s] at the end of buffer [b]. *)
 
-val add_bytes : t -> bytes -> unit
+val add_bytes : local_ t -> bytes -> unit
 (** [add_bytes b s] appends the byte sequence [s] at the end of buffer [b].
     @since 4.02 *)
 
-val add_substring : t -> string -> int -> int -> unit
+val add_substring : local_ t -> string -> int -> int -> unit
 (** [add_substring b s ofs len] takes [len] characters from offset
    [ofs] in string [s] and appends them at the end of buffer [b].
 
     @raise Invalid_argument if [ofs] and [len] do not designate a valid
     range of [s]. *)
 
-val add_subbytes : t -> bytes -> int -> int -> unit
+val add_subbytes : local_ t -> bytes -> int -> int -> unit
 (** [add_subbytes b s ofs len] takes [len] characters from offset
     [ofs] in byte sequence [s] and appends them at the end of buffer [b].
 
@@ -169,7 +169,7 @@ val add_subbytes : t -> bytes -> int -> int -> unit
 
     @since 4.02 *)
 
-val add_substitute : t -> (string -> string) -> string -> unit
+val add_substitute : local_ t -> (string -> string) -> string -> unit
 (** [add_substitute b f s] appends the string pattern [s] at the end
    of buffer [b] with substitution.
    The substitution process looks for variables into
@@ -185,11 +185,11 @@ val add_substitute : t -> (string -> string) -> string -> unit
    @raise Not_found if the closing character of a parenthesized variable
    cannot be found. *)
 
-val add_buffer : t -> t -> unit
+val add_buffer : local_ t -> local_ t -> unit
 (** [add_buffer b1 b2] appends the current contents of buffer [b2]
    at the end of buffer [b1].  [b2] is not modified. *)
 
-val add_channel : t -> in_channel -> int -> unit
+val add_channel : local_ t -> in_channel -> int -> unit
 (** [add_channel b ic n] reads at most [n] characters from the
    input channel [ic] and stores them at the end of buffer [b].
    @raise End_of_file if the channel contains fewer than [n]
@@ -241,85 +241,85 @@ val of_seq : char Seq.t -> t
     significant bytes.
 *)
 
-val add_uint8 : t -> int -> unit
+val add_uint8 : local_ t -> int -> unit
 (** [add_uint8 b i] appends a binary unsigned 8-bit integer [i] to
     [b].
     @since 4.08
 *)
 
-val add_int8 : t -> int -> unit
+val add_int8 : local_ t -> int -> unit
 (** [add_int8 b i] appends a binary signed 8-bit integer [i] to
     [b].
     @since 4.08
 *)
 
-val add_uint16_ne : t -> int -> unit
+val add_uint16_ne : local_ t -> int -> unit
 (** [add_uint16_ne b i] appends a binary native-endian unsigned 16-bit
     integer [i] to [b].
     @since 4.08
 *)
 
-val add_uint16_be : t -> int -> unit
+val add_uint16_be : local_ t -> int -> unit
 (** [add_uint16_be b i] appends a binary big-endian unsigned 16-bit
     integer [i] to [b].
     @since 4.08
 *)
 
-val add_uint16_le : t -> int -> unit
+val add_uint16_le : local_ t -> int -> unit
 (** [add_uint16_le b i] appends a binary little-endian unsigned 16-bit
     integer [i] to [b].
     @since 4.08
 *)
 
-val add_int16_ne : t -> int -> unit
+val add_int16_ne : local_ t -> int -> unit
 (** [add_int16_ne b i] appends a binary native-endian signed 16-bit
     integer [i] to [b].
     @since 4.08
 *)
 
-val add_int16_be : t -> int -> unit
+val add_int16_be : local_ t -> int -> unit
 (** [add_int16_be b i] appends a binary big-endian signed 16-bit
     integer [i] to [b].
     @since 4.08
 *)
 
-val add_int16_le : t -> int -> unit
+val add_int16_le : local_ t -> int -> unit
 (** [add_int16_le b i] appends a binary little-endian signed 16-bit
     integer [i] to [b].
     @since 4.08
 *)
 
-val add_int32_ne : t -> int32 -> unit
+val add_int32_ne : local_ t -> int32 -> unit
 (** [add_int32_ne b i] appends a binary native-endian 32-bit integer
     [i] to [b].
     @since 4.08
 *)
 
-val add_int32_be : t -> int32 -> unit
+val add_int32_be : local_ t -> int32 -> unit
 (** [add_int32_be b i] appends a binary big-endian 32-bit integer
     [i] to [b].
     @since 4.08
 *)
 
-val add_int32_le : t -> int32 -> unit
+val add_int32_le : local_ t -> int32 -> unit
 (** [add_int32_le b i] appends a binary little-endian 32-bit integer
     [i] to [b].
     @since 4.08
 *)
 
-val add_int64_ne  : t -> int64 -> unit
+val add_int64_ne  : local_ t -> int64 -> unit
 (** [add_int64_ne b i] appends a binary native-endian 64-bit integer
     [i] to [b].
     @since 4.08
 *)
 
-val add_int64_be : t -> int64 -> unit
+val add_int64_be : local_ t -> int64 -> unit
 (** [add_int64_be b i] appends a binary big-endian 64-bit integer
     [i] to [b].
     @since 4.08
 *)
 
-val add_int64_le : t -> int64 -> unit
+val add_int64_le : local_ t -> int64 -> unit
 (** [add_int64_ne b i] appends a binary little-endian 64-bit integer
     [i] to [b].
     @since 4.08

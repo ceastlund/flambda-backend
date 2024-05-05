@@ -1008,7 +1008,7 @@ let formatter_of_out_channel oc =
 
 (* Make a formatter writing to a given [Buffer.t] value. *)
 let formatter_of_buffer b =
-  make_formatter (Buffer.add_substring b) ignore
+  make_formatter (fun s pos len -> Buffer.add_substring b s pos len) ignore
 
 
 (* Allocating buffer for pretty-printing purposes.
@@ -1098,7 +1098,7 @@ let flush_str_formatter () =
 let make_synchronized_formatter output flush =
   DLS.new_key (fun () ->
     let buf = Buffer.create pp_buffer_size in
-    let output' = Buffer.add_substring buf in
+    let output' s pos len = Buffer.add_substring buf s pos len in
     let flush' () =
       output (Buffer.contents buf) 0 (Buffer.length buf);
       Buffer.clear buf;

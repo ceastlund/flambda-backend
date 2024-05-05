@@ -34,7 +34,7 @@ type inner_buffer = {
 type t =
  {mutable inner : inner_buffer;
   mutable position : int;
-  initial_buffer : bytes}
+  global_ initial_buffer : bytes}
 (* Invariants: all parts of the code preserve the invariants that:
    - [inner.length = Bytes.length inner.buffer]
    In absence of data races, we also have
@@ -116,7 +116,7 @@ let resize b more =
   As soon as we need to resize the buffer, we fall back to safe accesses.
 *)
 
-let add_char b c =
+let add_char (local_ b) c =
   let pos = b.position in
   let {buffer;length} = b.inner in
   if pos >= length then (
@@ -287,7 +287,7 @@ let add_substitute b f s =
          subst current (i + 1)
     end else
     if previous = '\\' then add_char b previous in
-  subst ' ' 0
+  subst ' ' 0 [@nontail]
 
 let truncate b len =
     if len < 0 || len > length b then
@@ -317,7 +317,7 @@ let to_seqi b =
   in
   aux 0
 
-let add_seq b seq = Seq.iter (add_char b) seq
+let add_seq b seq = Seq.iter (fun c -> add_char b c) seq
 
 let of_seq i =
   let b = create 32 in
