@@ -79,7 +79,7 @@ val sub : local_ t -> int -> int -> string
     @raise Invalid_argument if [off] and [len] do not designate a valid
     range of [b]. *)
 
-val blit : local_ t -> int -> bytes -> int -> int -> unit
+val blit : local_ t -> int -> local_ bytes -> int -> int -> unit
 (** [Buffer.blit src srcoff dst dstoff len] copies [len] characters from
    the current contents of the buffer [src], starting at offset [srcoff]
    to [dst], starting at character [dstoff].
@@ -146,21 +146,21 @@ val add_utf_16be_uchar : local_ t -> Uchar.t -> unit
 
     @since 4.06 *)
 
-val add_string : local_ t -> string -> unit
+val add_string : local_ t -> local_ string -> unit
 (** [add_string b s] appends the string [s] at the end of buffer [b]. *)
 
-val add_bytes : local_ t -> bytes -> unit
+val add_bytes : local_ t -> local_ bytes -> unit
 (** [add_bytes b s] appends the byte sequence [s] at the end of buffer [b].
     @since 4.02 *)
 
-val add_substring : local_ t -> string -> int -> int -> unit
+val add_substring : local_ t -> local_ string -> int -> int -> unit
 (** [add_substring b s ofs len] takes [len] characters from offset
    [ofs] in string [s] and appends them at the end of buffer [b].
 
     @raise Invalid_argument if [ofs] and [len] do not designate a valid
     range of [s]. *)
 
-val add_subbytes : local_ t -> bytes -> int -> int -> unit
+val add_subbytes : local_ t -> local_ bytes -> int -> int -> unit
 (** [add_subbytes b s ofs len] takes [len] characters from offset
     [ofs] in byte sequence [s] and appends them at the end of buffer [b].
 
@@ -289,37 +289,37 @@ val add_int16_le : local_ t -> int -> unit
     @since 4.08
 *)
 
-val add_int32_ne : local_ t -> int32 -> unit
+val add_int32_ne : local_ t -> local_ int32 -> unit
 (** [add_int32_ne b i] appends a binary native-endian 32-bit integer
     [i] to [b].
     @since 4.08
 *)
 
-val add_int32_be : local_ t -> int32 -> unit
+val add_int32_be : local_ t -> local_ int32 -> unit
 (** [add_int32_be b i] appends a binary big-endian 32-bit integer
     [i] to [b].
     @since 4.08
 *)
 
-val add_int32_le : local_ t -> int32 -> unit
+val add_int32_le : local_ t -> local_ int32 -> unit
 (** [add_int32_le b i] appends a binary little-endian 32-bit integer
     [i] to [b].
     @since 4.08
 *)
 
-val add_int64_ne  : local_ t -> int64 -> unit
+val add_int64_ne  : local_ t -> local_ int64 -> unit
 (** [add_int64_ne b i] appends a binary native-endian 64-bit integer
     [i] to [b].
     @since 4.08
 *)
 
-val add_int64_be : local_ t -> int64 -> unit
+val add_int64_be : local_ t -> local_ int64 -> unit
 (** [add_int64_be b i] appends a binary big-endian 64-bit integer
     [i] to [b].
     @since 4.08
 *)
 
-val add_int64_le : local_ t -> int64 -> unit
+val add_int64_le : local_ t -> local_ int64 -> unit
 (** [add_int64_ne b i] appends a binary little-endian 64-bit integer
     [i] to [b].
     @since 4.08

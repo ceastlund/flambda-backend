@@ -22,6 +22,37 @@ open! Stdlib
 
 [@@@ocaml.inline 3]
 [@@@ocaml.warning "A"]
+
+module String = struct
+  include String
+
+  external length : local_ string -> int = "%string_length"
+end
+
+module Bytes = struct
+  include Bytes
+
+  external length : local_ bytes -> int = "%bytes_length"
+  external unsafe_to_string : (bytes[@local_opt]) -> (string[@local_opt])
+    = "%bytes_to_string"
+  external unsafe_blit : local_ bytes -> int -> local_ bytes -> int -> int -> unit
+    = "caml_blit_bytes" [@@noalloc]
+  external unsafe_blit_string : local_ string -> int -> local_ bytes -> int -> int -> unit
+    = "caml_blit_string" [@@noalloc]
+
+  let blit s1 ofs1 s2 ofs2 len =
+    if len < 0 || ofs1 < 0 || ofs1 > length s1 - len
+       || ofs2 < 0 || ofs2 > length s2 - len
+    then invalid_arg "Bytes.blit"
+    else unsafe_blit s1 ofs1 s2 ofs2 len
+
+  let blit_string s1 ofs1 s2 ofs2 len =
+    if len < 0 || ofs1 < 0 || ofs1 > String.length s1 - len
+       || ofs2 < 0 || ofs2 > length s2 - len
+    then invalid_arg "String.blit / Bytes.blit_string"
+    else unsafe_blit_string s1 ofs1 s2 ofs2 len
+end
+
 (* The [inner_buffer] type ensures that the [length] and [buffer] fields are
    always synchronized, [length = Bytes.length buffer], even in presence
    of data races.
@@ -167,7 +198,7 @@ let add_substring b s offset len =
   b.position <- new_position
 
 let add_subbytes b s offset len =
-  add_substring b (Bytes.unsafe_to_string s) offset len
+  add_substring b (Bytes.unsafe_to_string s) offset len [@nontail]
 
 let add_string b s =
   let len = String.length s in
@@ -181,7 +212,7 @@ let add_string b s =
     Bytes.unsafe_blit_string s 0 buffer position len;
   b.position <- new_position
 
-let add_bytes b s = add_string b (Bytes.unsafe_to_string s)
+let add_bytes b s = add_string b (Bytes.unsafe_to_string s) [@nontail]
 
 let add_buffer b bs =
   add_subbytes b bs.inner.buffer 0 bs.position
@@ -326,18 +357,20 @@ let of_seq i =
 
 (** {6 Binary encoding of integers} *)
 
-external unsafe_set_int8 : bytes -> int -> int -> unit = "%bytes_unsafe_set"
-external unsafe_set_int16 : bytes -> int -> int -> unit = "%caml_bytes_set16u"
-external unsafe_set_int32 : bytes -> int -> int32 -> unit = "%caml_bytes_set32u"
-external unsafe_set_int64 : bytes -> int -> int64 -> unit = "%caml_bytes_set64u"
-external set_int8 : bytes -> int -> int -> unit = "%bytes_safe_set"
-external set_int16 : bytes -> int -> int -> unit = "%caml_bytes_set16"
-external set_int32 : bytes -> int -> int32 -> unit = "%caml_bytes_set32"
-external set_int64 : bytes -> int -> int64 -> unit = "%caml_bytes_set64"
+external unsafe_set_int8 : local_ bytes -> int -> int -> unit = "%bytes_unsafe_set"
+external unsafe_set_int16 : local_ bytes -> int -> int -> unit = "%caml_bytes_set16u"
+external unsafe_set_int32 : local_ bytes -> int -> local_ int32 -> unit
+  = "%caml_bytes_set32u"
+external unsafe_set_int64 : local_ bytes -> int -> local_ int64 -> unit
+  = "%caml_bytes_set64u"
+external set_int8 : local_ bytes -> int -> int -> unit = "%bytes_safe_set"
+external set_int16 : local_ bytes -> int -> int -> unit = "%caml_bytes_set16"
+external set_int32 : local_ bytes -> int -> local_ int32 -> unit = "%caml_bytes_set32"
+external set_int64 : local_ bytes -> int -> local_ int64 -> unit = "%caml_bytes_set64"
 
 external swap16 : int -> int = "%bswap16"
-external swap32 : int32 -> int32 = "%bswap_int32"
-external swap64 : int64 -> int64 = "%bswap_int64"
+external swap32 : (int32[@local_opt]) -> (int32[@local_opt]) = "%bswap_int32"
+external swap64 : (int64[@local_opt]) -> (int64[@local_opt]) = "%bswap_int64"
 
 
 let add_int8 b x =
@@ -391,16 +424,16 @@ let add_int16_be b x =
   add_int16_ne b (if Sys.big_endian then x else swap16 x)
 
 let add_int32_le b x =
-  add_int32_ne b (if Sys.big_endian then swap32 x else x)
+  add_int32_ne b (if Sys.big_endian then swap32 x else x) [@nontail]
 
 let add_int32_be b x =
-  add_int32_ne b (if Sys.big_endian then x else swap32 x)
+  add_int32_ne b (if Sys.big_endian then x else swap32 x) [@nontail]
 
 let add_int64_le b x =
-  add_int64_ne b (if Sys.big_endian then swap64 x else x)
+  add_int64_ne b (if Sys.big_endian then swap64 x else x) [@nontail]
 
 let add_int64_be b x =
-  add_int64_ne b (if Sys.big_endian then x else swap64 x)
+  add_int64_ne b (if Sys.big_endian then x else swap64 x) [@nontail]
 
 let add_uint8 = add_int8
 let add_uint16_ne = add_int16_ne
